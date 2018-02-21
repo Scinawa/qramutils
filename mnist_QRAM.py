@@ -34,6 +34,7 @@ np.set_printoptions(precision=4, threshold=np.nan, formatter={'float': '{: 0.4f}
 
 def create_x_dot(X, labels_indices):
     """
+    This is the same function used in QSFA to create the matrix X_dot.
 
     :param X:
     :param labels_indices:
@@ -64,7 +65,7 @@ def menu():
                         action="store_true", dest="generateplot", default=False)
 
     parser.add_argument("--analize", help="Run all the analysis of the matrix",
-                        action="store_true", dest="analize", default=True)
+                        action="store_true", dest="analize", default=False)
 
     # if not generate plot, you can specify these
     parser.add_argument("--pca-dim", help='pca dimension', action='store',
@@ -72,12 +73,15 @@ def menu():
     parser.add_argument("--polyexp", help='degree of polynomial expansion', action='store',
                         dest='polyexp', type=int, default=2)
 
+    parser.add_argument("--loglevel", help='set log level', action='store',
+                        dest='loglevel',  choices=['DEBUG','INFO'] )
+
     parsed_args = parser.parse_args()
 
     return parsed_args
 
 
-def analize():
+def analize(X):
     """
 
     :return:
@@ -86,24 +90,37 @@ def analize():
     libq = libQRAM(X)
 
     sparsity = libq.sparsity()
-    logging.info("Sparsity: {}".format(sparsity))
+    logging.info("Sparsity (0=dense 1=empty): {}".format(sparsity))
 
     frob_norm = libq.frobenius()
-    logging.info("The frobenius norm of the matrix is {}".format(frob_norm))
+    logging.info("The Frobenius norm: {}".format(frob_norm))
 
-    p_value_for_norm = libq.find_p()
-    logging.info("Best p value for data is {}".format(p_value_for_norm.x))
+    best_p = libq.find_p()
+    logging.info("Best p value: {}".format(best_p))
 
-    logging.info("The mu value is {} ".format(min(frob_norm, p_value_for_norm.fun)))
+    logging.info("The \\mu value is {} ".format(min(frob_norm, best_p)))
 
-    qubits_used = libq.find_qubits()
-    loggin.info("Qubits needed ceil(log_2(nd)) = {} ".format(qubits))
+    #qubits_used = libq.find_qubits()
+    #loggin.info("Qubits needed ceil(log_2(nd)) = {} ".format(qubits))
     return
 
+def set_logging_level(parsed_args):
+    """
+
+    :return:
+    """
+
+    if parsed_args.loglevel == 'DEBUG':
+        logging.getLogger().setLevel(logging.DEBUG)
+    if parsed_args.loglevel == 'INFO':
+        logging.getLogger().setLevel(logging.INFO)
 
 if "__main__" == __name__:
 
     parsed_args = menu()
+
+    set_logging_level(parsed_args)
+
 
     # if args.csv:
     #    parse_csv
@@ -113,11 +130,21 @@ if "__main__" == __name__:
     test_img, test_labels = mndata.load_testing()
     X = np.array(train_img)
 
-    if parsed_args.analzie:
-
+    if parsed_args.analize:
+        analize(X)
 
     if parsed_args.generateplot:
-        generateplots()
+        logging.info("Finding QRAM parameters with PCA and polynomial expansion")
+        polyexp = dict()
+        polyexp[2] = [20, 30, 40, 50, 70, 80, 90]
+        polyexp[3] = [20, 30, 40,
+                      50]  # 15, 20, 30] #20, 25] #, 30, 35, 40, 70, 90, 100, 120] #,25, 30] #, 40,50, 70, 90, 110, 150, 200]
 
+        for polydeg in polyexp:
+            for dim in polyexp[polydeg]:
+                logging.info("Polydeg: {} - PCA: {}".format(polydeg, dim))
+                pca = PCA(n_components=dim, svd_solver='full').fit(X)
+                x_train = pca.transform(X)
+                analize(x_train)
 
 
