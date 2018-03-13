@@ -1,3 +1,26 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+"""
+@brief
+
+@namespace ...
+@authors Alessandro Luongo <alessandro.luongo@atos.net>
+@copyright 2018  Bull S.A.S.  -  All rights reserved.
+           This code is released under LGPL license.
+           Please contact Bull SAS for details about its license.
+           Bull - Rue Jean Jaurès - B.P. 68 - 78340 Les Clayes-sous-Bois
+
+Description
+This library is meant to find the parameters of a dataset that will dictate the running 
+time of a QRAM query in a quantum computer. 
+
+
+"""
+
+
+
+
+
 import argparse
 import itertools
 import logging
@@ -90,7 +113,7 @@ class libQRAM():
 
         def s(p, X):
 
-            norms = np.linalg.norm(X, p, axis=1)
+            norms = np.power(np.linalg.norm(X, p, axis=1), np.full(X.shape[0], p))
             vector_of_powers = np.full(len(norms), p)
             # print(vector_of_powers)
             exp_norms = np.power(norms, vector_of_powers)
