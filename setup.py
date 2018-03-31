@@ -6,11 +6,11 @@ def read(fname):
 
 
 setup(
-    name='libQRAM-stat',
+    name='qramutils',
     version='0.1.0',
     author='Alessandro Scinawa Luongo',
     author_email='alessandro.luongo@atos.net',
-    packages=['libQRAM', 'libQRAM.test'],
+    packages=['qramutils'],
     #url='http://pypi.python.org/pypi/TowelStuff/',
     license='LICENSE',
     description='Library to get uneful statistics of a dataset for building a QRAM',
