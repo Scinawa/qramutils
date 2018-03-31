@@ -17,10 +17,6 @@ time of a QRAM query in a quantum computer.
 
 """
 
-
-
-
-
 import argparse
 import itertools
 import logging
@@ -36,7 +32,6 @@ import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 
-from mnist import MNIST
 
 from sklearn.preprocessing import normalize
 from sklearn.decomposition import PCA
@@ -52,7 +47,7 @@ logging.basicConfig(level=logging.DEBUG,
 np.set_printoptions(precision=4, threshold=np.nan, formatter={'float': '{: 0.4f}'.format})
 
 
-class libQRAM():
+class QramUtils():
     def __init__(self, dataset):
         """
         This library assume that the sample of the trainig set
