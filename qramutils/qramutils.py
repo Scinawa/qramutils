@@ -17,7 +17,6 @@ time of a QRAM query in a quantum computer.
 
 """
 
-import argparse
 import itertools
 import logging
 
@@ -39,16 +38,9 @@ from sklearn.neighbors import KNeighborsClassifier
 from sklearn import preprocessing
 from sklearn.metrics.pairwise import paired_distances
 
-logging.basicConfig(level=logging.DEBUG,
-                    format='%(asctime)s %(name)-4s %(levelname)-8s %(message)s',
-                    datefmt='%m-%d %H:%M',
-                    handlers=[logging.StreamHandler()])
-
-np.set_printoptions(precision=4, threshold=np.nan, formatter={'float': '{: 0.4f}'.format})
-
 
 class QramUtils():
-    def __init__(self, dataset):
+    def __init__(self, dataset, logging_handler=None):
         """
         This library assume that the sample of the trainig set
         are stored along the rows of the matrix.
@@ -57,6 +49,7 @@ class QramUtils():
         :return:
         """
         self.dataset = dataset
+        self.logging= logging_handler
         pass
 
     def find_qubits(self):
@@ -64,9 +57,9 @@ class QramUtils():
         Calculates how many qubits we need to index this matrix in a quantum register
         :return:
         """
-        index_register = np.ceil(np.log2())
-        content_register = np.ceil(np.log2())
-
+        index_register = np.ceil(np.log2(self.dataset.shape[0]))
+        content_register = np.ceil(np.log2(self.dataset.shape[1]))
+        qubits=index_register+content_register        
         return qubits
 
     def sparsity(self):
@@ -123,7 +116,7 @@ class QramUtils():
         s1 = s(2 * p, args['X'])
         s2 = s(2 * (1 - p), args['X'].T)
         mu = np.sqrt(s1 * s2)
-        logging.debug("mu = sqrt( s1(), s2()) = {}".format(mu))
+        self.logging.debug("mu = sqrt( s1(), s2()) = {}".format(mu))
 
         return mu
 
@@ -131,13 +124,13 @@ class QramUtils():
         """
 
         """
-        domain = [i for i in np.arange(0.0000000001, 1.0, 0.1)]
-        logging.debug("domain of mu: {}".format(domain))
+        domain = [i for i in np.arange(0.0001, 1.0, 0.05)]
+        self.logging.debug("domain of mu: {}".format(domain))
         values = [self.__mu(i, {'X': self.dataset}) for i in domain]
-        logging.debug("calculated values of p are: {}".format(values))
+        self.logging.debug("calculated values of p are: {}".format(values))
         best_p = domain[values.index(min(values))]
-        logging.info('best p {}'.format(best_p))
-        return best_p
+        self.logging.info('best p {}'.format(best_p))
+        return best_p, min(values)
 
     def find_p(self):
         """
@@ -154,33 +147,7 @@ class QramUtils():
                        bounds=((0.0000000001, 1),))
         # constraints=cons)
 
-        return res
-
-
-def menu():
-    """
-    Create the nice *NIX like menu
-    """
-
-    parser = argparse.ArgumentParser(add_help=True, description='Analyze a dataset and model QRAM parameters')
-
-    parser.add_argument("--db", help="path of the mnist database",
-                        action='store', dest='db', default='/home/scinawa/workspaces/libQRAM/data')
-
-    parser.add_argument("--generateplot", help="run experiment with various dimension",
-                        action="store_true", dest="generateplot", default=False)
-    parser.add_argument("--analize", help="Run all the analysis of the matrix",
-                        action="store_true", dest="analize", default=True)
-
-    # if not generate plot, you can specify these
-    parser.add_argument("--pca-dim", help='pca dimension', action='store',
-                        dest='pcadim', type=int, default=39)
-    parser.add_argument("--polyexp", help='degree of polynomial expansion', action='store',
-                        dest='polyexp', type=int, default=2)
-
-    parsed_args = parser.parse_args()
-
-    return parsed_args
+        return res.x, res.fun
 
 
 if "__main__" == __name__:
