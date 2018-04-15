@@ -16,7 +16,7 @@ time of a QRAM query in a quantum computer.
 
 
 """
-
+import os
 import itertools
 import logging
 
@@ -40,6 +40,34 @@ from sklearn.metrics.pairwise import paired_distances
 
 
 class QramUtils():
+
+    @classmethod
+    def plot_singular_values(self, sv, label):
+        fig1 = plt.figure(figsize=(7.6,7.6))
+        ax = fig1.add_subplot(111)
+        for item in ([ax.title, ax.xaxis.label, ax.yaxis.label] + ax.get_xticklabels() + ax.get_yticklabels()):
+                item.set_fontsize(10)
+    
+        plt.grid()
+        ax.plot(range(len(sv)), sv, label=label)
+        #ax.set_xlabel("Singular value")
+        ax.set_ylabel("Magnitude of singular values")
+    
+        #ax.set_ylim(ymin=0, ymax=20)
+        #ax.set_xlim(xmin=0, xmax=max(polyexp[2])+5)
+        # ax.set_yscale('log')
+    
+        plt.legend(loc='upper right', prop={'size': 18})
+    
+        dst_path='sv_plot_'+label+'.png'
+        try:
+          fig1.savefig(dst_path)
+          print("Plot {0} created".format(dst_path))
+        except Exception as e:
+          print("Exception catched {}".format(e))
+    
+
+
     def __init__(self, dataset, logging_handler=None):
         """
         This library assume that the sample of the trainig set
@@ -80,7 +108,7 @@ class QramUtils():
 
         eigval = linalg.svd(self.dataset, compute_uv=False)
 
-        eigval = np.square(eigval)
+        #eigval = np.square(eigval)
 
         normalized_eigenvalues = np.true_divide(eigval, max(eigval))
 

@@ -17,3 +17,5 @@ scipy = "*"
 matplotlib = "*"
 scikit-learn = "*"
 sklearn = "*"
+"2400f1d" = {path = "./dist/qram-utils-0.1.0.tar.gz"}
+"bc9457e" = {path = "./dist/qramutils-0.1.0.tar.gz"}

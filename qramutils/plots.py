@@ -31,8 +31,8 @@ import matplotlib.pyplot as plt
     ax.set_xlabel(x_axis_label)
     ax.set_ylabel(y_axis_label)
 
-    ax.set_ylim(ymin=0)
-    ax.set_xlim(xmin=0)
+    ax.set_ylim(ymin=0, ymax=50)
+    ax.set_xlim(xmin=0, xmax=50)
    # ax.set_yscale('log')
 
     plt.legend(loc='lower right', prop={'size': 18})
